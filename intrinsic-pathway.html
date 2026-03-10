@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Intrinsic Pathway — Coagulation Study Aid</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', 'Charter', Georgia, serif;
+    background: #f8fafc; color: #1e293b;
+    padding: 24px 16px 48px; min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+
+  .course-tag { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  h1 { font-size: 30px; font-weight: 700; color: #0f172a; line-height: 1.2; margin-bottom: 4px; }
+  .subtitle { font-size: 16px; color: #64748b; line-height: 1.5; margin-bottom: 12px; }
+  .subtitle strong { color: #1e293b; }
+  .subtitle .blue { color: #2563eb; }
+
+  .toggle-btn {
+    background: #fff; border: 1.5px solid #d1d5db; border-radius: 6px;
+    padding: 6px 14px; font-size: 13px; cursor: pointer;
+    font-family: inherit; color: #475569; transition: all 0.2s;
+  }
+  .toggle-btn.active { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
+
+  .facts-grid {
+    background: #fff; border: 2px solid #bfdbfe; border-radius: 10px;
+    padding: 16px; margin: 24px 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;
+  }
+  .fact-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .fact-value { font-size: 14px; font-weight: 700; color: #2563eb; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+
+  .flowchart { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  .step-box {
+    width: 100%; max-width: 600px; border-radius: 12px; padding: 16px 20px;
+    transition: box-shadow 0.2s; cursor: pointer;
+  }
+  .step-box:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .step-inner { display: flex; align-items: flex-start; gap: 14px; }
+  .step-icon { font-size: 26px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+  .step-content { flex: 1; }
+  .step-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .step-title { font-size: 18px; font-weight: 700; margin: 0; }
+  .step-sub { font-size: 14px; color: #475569; margin-top: 6px; line-height: 1.5; }
+  .step-label { margin-top: 8px; font-size: 12px; color: #6b7280; font-style: italic; line-height: 1.4; }
+
+  .factor-detail {
+    display: flex; align-items: center; gap: 10px; margin-top: 12px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .factor-box { border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 140px; }
+  .factor-box .name { font-size: 16px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+  .factor-box .desc { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .factor-box .note-text { font-size: 10px; color: #d97706; margin-top: 3px; font-weight: 600; }
+  .arrow-label { display: flex; flex-direction: column; align-items: center; }
+  .arrow-label span { font-size: 11px; color: #9ca3af; font-style: italic; }
+
+  .contact-group {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: center;
+  }
+  .contact-card {
+    background: #fff; border: 2px solid #2563eb; border-radius: 8px;
+    padding: 10px 14px; text-align: center; min-width: 130px; flex: 1 1 130px;
+  }
+  .contact-card .cc-name { font-size: 15px; font-weight: 700; color: #2563eb; font-family: 'IBM Plex Mono', monospace; }
+  .contact-card .cc-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .contact-card .cc-note { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+  .tenase-box {
+    margin-top: 12px; border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .tenase-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .tenase-parts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+  .tenase-part { background: #fff; border-radius: 6px; padding: 6px 12px; text-align: center; }
+  .tenase-part .tp-name { font-size: 15px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+  .tenase-part .tp-sub { font-size: 10px; color: #6b7280; }
+  .tenase-plus { font-weight: 700; font-size: 16px; }
+  .tenase-footer { margin-top: 8px; font-size: 12px; font-style: italic; }
+
+  .expand-note {
+    margin-top: 10px; padding: 10px 14px; background: #fff;
+    border-radius: 6px; font-size: 13px; color: #475569; line-height: 1.5;
+    display: none;
+  }
+  .expand-note.visible { display: block; }
+  .tap-hint { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+
+  .branch-container { width: 100%; max-width: 640px; }
+  .branch-boxes { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .branch-box {
+    flex: 1 1 260px; max-width: 300; border-radius: 12px;
+    padding: 16px 18px; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .branch-box:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .branch-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .branch-tag {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; padding: 2px 8px; border-radius: 4px;
+  }
+  .branch-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .branch-sub { font-size: 13px; color: #475569; margin: 0; line-height: 1.4; }
+  .branch-note {
+    margin-top: 10px; padding: 10px 12px; background: #fff;
+    border-radius: 6px; font-size: 13px; color: #475569; line-height: 1.5;
+    display: none;
+  }
+  .branch-note.visible { display: block; }
+
+  .clinical-panel {
+    margin-top: 28px; background: #fff; border: 2px solid #bfdbfe;
+    border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: none;
+  }
+  .clinical-panel.visible { display: block; }
+  .clinical-panel h3 { font-size: 18px; font-weight: 700; margin: 0 0 14px; color: #2563eb; }
+  .clinical-items { display: flex; flex-direction: column; gap: 14px; }
+  .clinical-item { padding-left: 14px; border-left: 4px solid; }
+  .clinical-item .item-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+  .clinical-item .item-text { font-size: 14px; color: #475569; line-height: 1.5; margin-top: 3px; }
+
+  .summary-box {
+    margin-top: 24px; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .summary-box h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; color: #475569; }
+  .sf { font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 2; color: #374151; }
+  .sf .blu { color: #2563eb; font-weight: 700; }
+  .sf .amber { color: #d97706; font-size: 12px; }
+  .sf .gray { color: #9ca3af; font-size: 12px; }
+  .sf .italic { color: #6b7280; font-style: italic; font-size: 12px; }
+  .sf .indent { padding-left: 16px; }
+  .sf .tenase-badge { background: #dbeafe; border-radius: 6px; padding: 4px 10px; display: inline-block; }
+  .sf .tenase-badge span { color: #1d4ed8; font-weight: 700; }
+  .sf .branch-line { padding-left: 16px; display: flex; gap: 32px; flex-wrap: wrap; margin-top: 4px; }
+  .sf .red { color: #dc2626; font-weight: 600; }
+  .sf .grn { color: #059669; font-weight: 600; }
+  .sf .small { font-size: 11px; color: #9ca3af; }
+
+  .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #cbd5e1; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 24px; }
+    .facts-grid { grid-template-columns: 1fr 1fr; }
+    .factor-detail { flex-direction: column; }
+    .contact-group { flex-direction: column; align-items: center; }
+    .branch-boxes { flex-direction: column; align-items: center; }
+    .branch-box { max-width: 100%; }
+    .tenase-parts { flex-direction: column; }
+    .sf .branch-line { flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div style="margin-bottom:28px;">
+    <div class="course-tag">10513121 Coagulation · Chapter 15</div>
+    <h1>The Intrinsic Pathway</h1>
+    <p class="subtitle">
+      The slower, contact-activation pathway. Involves Factors <strong>XII, XI, IX, VIII</strong> plus
+      <strong>platelet phospholipids</strong> and <strong>calcium</strong>.
+      Monitored by the <strong class="blue">aPTT</strong>.
+    </p>
+    <button class="toggle-btn" id="clinicalToggle" onclick="toggleClinical()">Show Clinical &amp; BOC Notes</button>
+  </div>
+
+  <div class="facts-grid">
+    <div><div class="fact-label">Factors Involved</div><div class="fact-value">XII, XI, IX, VIII</div></div>
+    <div><div class="fact-label">Contact Group</div><div class="fact-value">XII, XI, PK, HMWK</div></div>
+    <div><div class="fact-label">Monitored By</div><div class="fact-value">aPTT</div></div>
+    <div><div class="fact-label">Vit K Dependent</div><div class="fact-value">Factor IX ★</div></div>
+    <div><div class="fact-label">Cofactors Needed</div><div class="fact-value">Ca²⁺ + PF3</div></div>
+    <div><div class="fact-label">Key Complex</div><div class="fact-value">Tenase (IXa+VIIIa)</div></div>
+  </div>
+
+  <div class="flowchart">
+
+    <!-- Step 1 -->
+    <div class="step-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleStep('s1')">
+      <div class="step-inner">
+        <div class="step-icon">🩸</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#2563eb;">1</div>
+            <h3 class="step-title" style="color:#2563eb;">Endothelial Surface Exposed</h3>
+          </div>
+          <p class="step-sub">Damage or activation of endothelial cells exposes the subendothelial surface (collagen). All components of contact activation are present in the blood — they just need a surface.</p>
+          <div class="expand-note" id="s1-note" style="border:1px solid rgba(37,99,235,0.2);">💡 In vitro, contact activation is triggered by glass, kaolin, or celite — this is why the test is called 'Activated' Partial Thromboplastin Time.</div>
+          <div class="tap-hint" id="s1-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <svg width="24" height="28" viewBox="0 0 24 28" style="margin:2px 0;"><path d="M12 2 L12 20 M8 17 L12 24 L16 17" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 2: Contact Activation -->
+    <div class="step-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleStep('s2')">
+      <div class="step-inner">
+        <div class="step-icon">🔗</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#2563eb;">2</div>
+            <h3 class="step-title" style="color:#2563eb;">Contact Activation Phase</h3>
+          </div>
+          <p class="step-sub">The exposed surface activates three contact proteins simultaneously:</p>
+          <div class="contact-group">
+            <div class="contact-card">
+              <div class="cc-name">HMWK</div>
+              <div class="cc-sub">Fitzgerald Factor</div>
+              <div class="cc-note">High-mol-wt kininogen</div>
+            </div>
+            <div class="contact-card">
+              <div class="cc-name">Prekallikrein</div>
+              <div class="cc-sub">Fletcher Factor</div>
+              <div class="cc-note">PK</div>
+            </div>
+            <div class="contact-card">
+              <div class="cc-name">Factor XII</div>
+              <div class="cc-sub">Hageman Factor</div>
+              <div class="cc-note">Contact activation</div>
+            </div>
+          </div>
+          <div class="step-label">These are the CONTACT GROUP — deficiencies cause prolonged aPTT but usually NO clinical bleeding</div>
+          <div class="expand-note" id="s2-note" style="border:1px solid rgba(37,99,235,0.2);">💡 Contact factor deficiencies (XII, PK, HMWK) prolong the aPTT but do NOT cause bleeding. This is a classic BOC question — Factor XII (Hageman) deficiency = prolonged aPTT + no bleeding. Factor XI deficiency may cause mild bleeding with trauma.</div>
+          <div class="tap-hint" id="s2-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <svg width="24" height="28" viewBox="0 0 24 28" style="margin:2px 0;"><path d="M12 2 L12 20 M8 17 L12 24 L16 17" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 3: XII → XIIa -->
+    <div class="step-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleStep('s3')">
+      <div class="step-inner">
+        <div class="step-icon">⚡</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#2563eb;">3</div>
+            <h3 class="step-title" style="color:#2563eb;">Factor XII → XIIa</h3>
+          </div>
+          <p class="step-sub">Contact with the negatively charged surface activates Factor XII (Hageman Factor) to XIIa.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #2563eb;">
+              <div class="name" style="color:#2563eb;">Factor XII</div>
+              <div class="desc">Hageman Factor</div>
+            </div>
+            <div class="arrow-label">
+              <span>+ surface</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs><path d="M4 10 L32 10" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arr3)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(37,99,235,0.08); border:2px solid #2563eb;">
+              <div class="name" style="color:#2563eb;">Factor XIIa</div>
+              <div class="desc">Activated Hageman</div>
+            </div>
+          </div>
+          <div class="expand-note" id="s3-note" style="border:1px solid rgba(37,99,235,0.2);">💡 Factor XII also participates in the complement system (C1 → C1 esterase), fibrinolysis (plasminogen activation), and the kinin system. Deficiency is associated with thrombosis, NOT bleeding — a frequently tested concept.</div>
+          <div class="tap-hint" id="s3-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <svg width="24" height="28" viewBox="0 0 24 28" style="margin:2px 0;"><path d="M12 2 L12 20 M8 17 L12 24 L16 17" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 4: XI → XIa -->
+    <div class="step-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleStep('s4')">
+      <div class="step-inner">
+        <div class="step-icon">⚡</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#2563eb;">4</div>
+            <h3 class="step-title" style="color:#2563eb;">Factor XI → XIa</h3>
+          </div>
+          <p class="step-sub">Factor XIIa activates Factor XI (Plasma Thromboplastin Antecedent) to XIa.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #2563eb;">
+              <div class="name" style="color:#2563eb;">Factor XI</div>
+              <div class="desc">PTA (Rosenthal)</div>
+            </div>
+            <div class="arrow-label">
+              <span>+ XIIa</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs><path d="M4 10 L32 10" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arr4)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(37,99,235,0.08); border:2px solid #2563eb;">
+              <div class="name" style="color:#2563eb;">Factor XIa</div>
+              <div class="desc">Activated PTA</div>
+            </div>
+          </div>
+          <div class="expand-note" id="s4-note" style="border:1px solid rgba(37,99,235,0.2);">💡 Factor XI deficiency = Hemophilia C (Rosenthal disease). Common in Ashkenazi Jewish populations. Causes mild bleeding, usually only with trauma or surgery — NOT spontaneous bleeding like Hemophilia A or B.</div>
+          <div class="tap-hint" id="s4-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <svg width="24" height="28" viewBox="0 0 24 28" style="margin:2px 0;"><path d="M12 2 L12 20 M8 17 L12 24 L16 17" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 5: IX → IXa -->
+    <div class="step-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleStep('s5')">
+      <div class="step-inner">
+        <div class="step-icon">⚡</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#2563eb;">5</div>
+            <h3 class="step-title" style="color:#2563eb;">Factor IX → IXa</h3>
+          </div>
+          <p class="step-sub">Factor XIa activates Factor IX (Christmas Factor) to IXa in the presence of calcium.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #2563eb;">
+              <div class="name" style="color:#2563eb;">Factor IX</div>
+              <div class="desc">Christmas Factor</div>
+              <div class="note-text">Vitamin K dependent ★</div>
+            </div>
+            <div class="arrow-label">
+              <span>+ Ca²⁺</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs><path d="M4 10 L32 10" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arr5)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(37,99,235,0.08); border:2px solid #2563eb;">
+              <div class="name" style="color:#2563eb;">Factor IXa</div>
+              <div class="desc">Activated Christmas</div>
+            </div>
+          </div>
+          <div class="step-label">★ Factor IX is Vitamin K dependent (part of the '1972' group: II, VII, IX, X)</div>
+          <div class="expand-note" id="s5-note" style="border:1px solid rgba(37,99,235,0.2);">💡 Factor IX deficiency = Hemophilia B (Christmas Disease). X-linked recessive, like Hemophilia A. Clinically indistinguishable from Hemophilia A — requires specific factor assays to differentiate. Both show prolonged aPTT with normal PT.</div>
+          <div class="tap-hint" id="s5-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <svg width="24" height="28" viewBox="0 0 24 28" style="margin:2px 0;"><path d="M12 2 L12 20 M8 17 L12 24 L16 17" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 6: Tenase Complex -->
+    <div class="step-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleStep('s6')">
+      <div class="step-inner">
+        <div class="step-icon">⚙️</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#2563eb;">6</div>
+            <h3 class="step-title" style="color:#2563eb;">TENASE Complex Formation</h3>
+          </div>
+          <p class="step-sub">Factor IXa combines with Factor VIIIa (cofactor), calcium, and platelet phospholipid (PF3) on the platelet surface to form the Tenase Complex — the primary activator of Factor X.</p>
+
+          <div class="tenase-box" style="background:#dbeafe; border:2px solid #1d4ed8;">
+            <div class="tenase-title" style="color:#1e40af;">Tenase Complex</div>
+            <div class="tenase-parts">
+              <div class="tenase-part" style="border:2px solid #1d4ed8;"><div class="tp-name" style="color:#1d4ed8;">IXa</div><div class="tp-sub">enzyme</div></div>
+              <span class="tenase-plus" style="color:#1d4ed8;">+</span>
+              <div class="tenase-part" style="border:2px solid #1d4ed8;"><div class="tp-name" style="color:#1d4ed8;">VIIIa</div><div class="tp-sub">cofactor</div></div>
+              <span class="tenase-plus" style="color:#1d4ed8;">+</span>
+              <div class="tenase-part" style="border:2px solid #1d4ed8;"><div class="tp-name" style="color:#1d4ed8;">Ca²⁺</div><div class="tp-sub">calcium</div></div>
+              <span class="tenase-plus" style="color:#1d4ed8;">+</span>
+              <div class="tenase-part" style="border:2px solid #1d4ed8;"><div class="tp-name" style="color:#1d4ed8;">PF3</div><div class="tp-sub">phospholipid</div></div>
+            </div>
+            <div class="tenase-footer" style="color:#1e40af;">Assembled on the activated platelet surface</div>
+          </div>
+
+          <div class="step-label">Factor VIII is NOT Vitamin K dependent — it is produced in endothelium and carried by vWF</div>
+          <div class="expand-note" id="s6-note" style="border:1px solid rgba(37,99,235,0.2);">💡 Factor VIII deficiency = Hemophilia A (Classic Hemophilia) — the most common severe bleeding disorder. X-linked recessive. aPTT is prolonged, PT is normal. Factor VIII is a COFACTOR (not an enzyme) — it accelerates the reaction but doesn't catalyze it alone. vWF serves as a carrier protein for Factor VIII in plasma.</div>
+          <div class="tap-hint" id="s6-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branch arrows -->
+    <div style="display:flex; justify-content:center; margin-top:6px;">
+      <svg width="400" height="48" viewBox="0 0 400 48">
+        <defs>
+          <marker id="arrBr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker>
+          <marker id="arrBg" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+        </defs>
+        <path d="M200 4 Q120 36 80 42" fill="none" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrBr)"/>
+        <path d="M200 4 Q280 36 320 42" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#arrBg)"/>
+        <text x="200" y="14" fill="#1d4ed8" font-size="11" font-family="Source Serif 4, serif" font-weight="600" text-anchor="middle">activates</text>
+      </svg>
+    </div>
+
+    <!-- Branch boxes -->
+    <div class="branch-boxes">
+      <div class="branch-box" style="background:#fef2f2; border:2.5px solid #dc2626;" onclick="toggleBranch('brIX')">
+        <div class="branch-header">
+          <span style="font-size:20px;">🔴</span>
+          <span class="branch-tag" style="color:#dc2626; background:rgba(220,38,38,0.1);">CROSSOVER FROM EXTRINSIC</span>
+        </div>
+        <h3 class="branch-title" style="color:#dc2626;">Factor IX → IXa</h3>
+        <p class="branch-sub">Also activated by TF-VIIa complex from the extrinsic pathway — this is where the pathways connect</p>
+        <div class="branch-note" id="brIX-note" style="border:1px solid rgba(220,38,38,0.2);">💡 The crossover explains why both PT and aPTT can be affected in deficiencies of common components. The extrinsic pathway (TF-VIIa) also activates IX, providing an alternate route.</div>
+        <div class="tap-hint" id="brIX-hint">▼ tap for detail</div>
+      </div>
+
+      <div class="branch-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleBranch('brX')">
+        <div class="branch-header">
+          <span style="font-size:20px;">🟢</span>
+          <span class="branch-tag" style="color:#059669; background:rgba(5,150,105,0.1);">→ COMMON PATHWAY</span>
+        </div>
+        <h3 class="branch-title" style="color:#059669;">Factor X → Xa</h3>
+        <p class="branch-sub">The Tenase complex activates Factor X — the entry point to the common pathway</p>
+        <div class="branch-note" id="brX-note" style="border:1px solid rgba(5,150,105,0.2);">💡 Factor X (Stuart-Prower) is activated by BOTH the intrinsic tenase complex AND the extrinsic TF-VIIa complex. It is Vitamin K dependent and is the first factor in the common pathway.</div>
+        <div class="tap-hint" id="brX-hint">▼ tap for detail</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Clinical & BOC Notes -->
+  <div class="clinical-panel" id="clinicalPanel">
+    <h3>Clinical &amp; BOC Exam Notes</h3>
+    <div class="clinical-items">
+      <div class="clinical-item" style="border-color:#2563eb;">
+        <div class="item-title">aPTT Monitoring</div>
+        <div class="item-text">The aPTT evaluates the intrinsic + common pathways. Patient plasma + phospholipid + contact activator + Ca²⁺ → clot. Normal aPTT: ~25-35 seconds. Prolonged aPTT with normal PT → intrinsic pathway defect (VIII, IX, XI, or XII).</div>
+      </div>
+      <div class="clinical-item" style="border-color:#dc2626;">
+        <div class="item-title">Hemophilia A vs. B — High-Yield BOC</div>
+        <div class="item-text">Hemophilia A (Factor VIII deficiency) = most common severe bleeding disorder (~80% of hemophilia). Hemophilia B (Factor IX deficiency) = Christmas Disease (~15%). Both are X-linked recessive, both show prolonged aPTT with normal PT. Differentiation requires specific factor assays.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#d97706;">
+        <div class="item-title">Contact Factor Deficiency — Classic Trick Question</div>
+        <div class="item-text">Factor XII (Hageman) deficiency causes a markedly prolonged aPTT but NO clinical bleeding. This is the most tested concept — students expect prolonged aPTT = bleeding, but contact factors are not required for in vivo hemostasis. Factor XII deficiency is actually associated with THROMBOSIS.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#059669;">
+        <div class="item-title">Factor VIII &amp; von Willebrand Factor</div>
+        <div class="item-text">Factor VIII circulates bound to vWF — vWF is its carrier protein. In von Willebrand disease, Factor VIII levels may be decreased because without vWF, Factor VIII is rapidly degraded. This is why vWD can cause a prolonged aPTT.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#7c3aed;">
+        <div class="item-title">Heparin &amp; the aPTT</div>
+        <div class="item-text">Unfractionated heparin (UFH) potentiates antithrombin → inhibits thrombin (IIa) and Factor Xa. Monitored by aPTT. LMWH primarily inhibits Xa and is monitored by anti-Xa assay, NOT aPTT. BOC loves this distinction.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#0891b2;">
+        <div class="item-title">Mixing Studies</div>
+        <div class="item-text">Prolonged aPTT → perform 1:1 mixing study with normal plasma. If aPTT CORRECTS → factor deficiency. If aPTT does NOT correct → inhibitor present (lupus anticoagulant or specific factor inhibitor). Classic BOC format.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-box">
+    <h3>Summary: Intrinsic Pathway at a Glance</h3>
+    <div class="sf">
+      <div><span class="blu">Endothelial Surface Exposed</span></div>
+      <div class="indent">↓ <span class="italic">activates contact proteins</span></div>
+      <div><span class="blu">HMWK + PK + Factor XII</span> <span class="gray">(contact group)</span></div>
+      <div class="indent">↓</div>
+      <div><span class="blu">XII → XIIa</span> <span class="gray">(Hageman)</span></div>
+      <div class="indent">↓</div>
+      <div><span class="blu">XI → XIa</span> <span class="gray">(PTA / Rosenthal)</span></div>
+      <div class="indent">↓ <span class="italic">+ Ca²⁺</span></div>
+      <div><span class="blu">IX → IXa</span> <span class="amber">★ Vit K dep.</span> <span class="gray">(Christmas)</span></div>
+      <div class="indent">↓ <span class="italic">+ VIIIa + Ca²⁺ + PF3</span></div>
+      <div class="tenase-badge"><span>TENASE COMPLEX</span> <span style="font-size:12px; color:#6b7280;">(IXa + VIIIa + Ca²⁺ + PF3)</span></div>
+      <div class="branch-line">
+        <div><span style="color:#6b7280;">↙</span> <span class="red">IX ← also from extrinsic</span></div>
+        <div><span style="color:#6b7280;">↘</span> <span class="grn">X → Xa</span> <span class="small">(→ common pathway)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Northwood Technical College · MLT Program · Ciesla Ch. 15</div>
+
+</div>
+
+<script>
+var currentExpanded = null;
+
+function closeAll() {
+  document.querySelectorAll('.expand-note').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.branch-note').forEach(function(el) { el.classList.remove('visible'); });
+  ['s1','s2','s3','s4','s5','s6'].forEach(function(id) {
+    var h = document.getElementById(id + '-hint');
+    if (h) h.textContent = '▼ tap for more detail';
+  });
+  ['brIX','brX'].forEach(function(id) {
+    var h = document.getElementById(id + '-hint');
+    if (h) h.textContent = '▼ tap for detail';
+  });
+  currentExpanded = null;
+}
+
+function toggleStep(id) {
+  var note = document.getElementById(id + '-note');
+  var hint = document.getElementById(id + '-hint');
+  var was = currentExpanded === id;
+  closeAll();
+  if (!was && note) {
+    note.classList.add('visible');
+    if (hint) hint.textContent = '▲ tap to collapse';
+    currentExpanded = id;
+  }
+}
+
+function toggleBranch(id) {
+  var note = document.getElementById(id + '-note');
+  var hint = document.getElementById(id + '-hint');
+  var was = currentExpanded === id;
+  closeAll();
+  if (!was && note) {
+    note.classList.add('visible');
+    if (hint) hint.textContent = '▲ collapse';
+    currentExpanded = id;
+  }
+}
+
+function toggleClinical() {
+  var panel = document.getElementById('clinicalPanel');
+  var btn = document.getElementById('clinicalToggle');
+  var isVisible = panel.classList.contains('visible');
+  if (isVisible) {
+    panel.classList.remove('visible');
+    btn.classList.remove('active');
+    btn.textContent = 'Show Clinical & BOC Notes';
+  } else {
+    panel.classList.add('visible');
+    btn.classList.add('active');
+    btn.textContent = 'Hide Clinical & BOC Notes';
+  }
+}
+</script>
+</body>
+</html>
