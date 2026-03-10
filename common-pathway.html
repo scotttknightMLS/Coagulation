@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Common Pathway — Coagulation Study Aid</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', 'Charter', Georgia, serif;
+    background: #f8fafc;
+    color: #1e293b;
+    padding: 24px 16px 48px;
+    min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* Header */
+  .course-tag { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  h1 { font-size: 30px; font-weight: 700; color: #0f172a; line-height: 1.2; margin-bottom: 4px; }
+  .subtitle { font-size: 16px; color: #64748b; line-height: 1.5; margin-bottom: 12px; }
+  .subtitle strong { color: #1e293b; }
+  .subtitle .green { color: #059669; }
+
+  .toggle-btn {
+    background: #fff; border: 1.5px solid #d1d5db; border-radius: 6px;
+    padding: 6px 14px; font-size: 13px; cursor: pointer;
+    font-family: inherit; color: #475569; transition: all 0.2s;
+  }
+  .toggle-btn.active { background: #ecfdf5; border-color: #059669; color: #059669; }
+
+  /* Key facts grid */
+  .facts-grid {
+    background: #fff; border: 2px solid #a7f3d0; border-radius: 10px;
+    padding: 16px; margin: 24px 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;
+  }
+  .fact-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .fact-value { font-size: 14px; font-weight: 700; color: #059669; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+
+  /* Input pathway boxes */
+  .input-paths {
+    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .input-box {
+    border-radius: 10px; padding: 12px 18px; text-align: center;
+    flex: 1 1 200px; max-width: 260;
+  }
+  .input-box .tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .input-box .name { font-size: 14px; font-weight: 600; margin-top: 4px; }
+  .input-box .desc { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Flowchart */
+  .flowchart { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  .step-box {
+    width: 100%; max-width: 620px;
+    border-radius: 12px; padding: 16px 20px;
+    transition: box-shadow 0.2s; cursor: pointer;
+  }
+  .step-box:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  .step-inner { display: flex; align-items: flex-start; gap: 14px; }
+  .step-icon { font-size: 26px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+  .step-content { flex: 1; }
+  .step-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .step-title { font-size: 18px; font-weight: 700; margin: 0; }
+  .step-sub { font-size: 14px; color: #475569; margin-top: 6px; line-height: 1.5; }
+  .step-label { margin-top: 8px; font-size: 12px; color: #6b7280; font-style: italic; line-height: 1.4; }
+
+  /* Factor pair boxes */
+  .factor-detail {
+    display: flex; align-items: center; gap: 10px; margin-top: 12px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .factor-box { border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 140px; }
+  .factor-box .name { font-size: 16px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+  .factor-box .desc { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .factor-box .note-text { font-size: 10px; color: #d97706; margin-top: 3px; font-weight: 600; }
+  .arrow-label { display: flex; flex-direction: column; align-items: center; }
+  .arrow-label span { font-size: 11px; color: #9ca3af; font-style: italic; }
+
+  /* Prothrombinase complex box */
+  .complex-box {
+    margin-top: 12px; border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .complex-box .complex-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .complex-parts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+  .complex-part {
+    background: #fff; border-radius: 6px; padding: 6px 12px; text-align: center;
+  }
+  .complex-part .part-name { font-size: 15px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+  .complex-part .part-sub { font-size: 10px; color: #6b7280; }
+  .complex-plus { color: #047857; font-weight: 700; font-size: 16px; }
+  .complex-footer { margin-top: 8px; font-size: 12px; font-style: italic; }
+
+  /* Expandable notes */
+  .expand-note {
+    margin-top: 10px; padding: 10px 14px;
+    background: #fff; border-radius: 6px;
+    font-size: 13px; color: #475569; line-height: 1.5;
+    display: none;
+  }
+  .expand-note.visible { display: block; }
+  .tap-hint { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+
+  /* Thrombin roles grid */
+  .thrombin-roles {
+    margin-top: 14px; display: none;
+    grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .thrombin-roles.visible { display: grid; }
+  .role-box { border-radius: 6px; padding: 10px; }
+  .role-box .role-title { font-size: 11px; font-weight: 700; }
+  .role-box .role-text { font-size: 12px; color: #475569; margin-top: 3px; line-height: 1.4; }
+
+  /* Fibrin steps */
+  .fibrin-steps {
+    margin-top: 12px; background: #fff; border-radius: 8px; padding: 12px;
+    display: none;
+  }
+  .fibrin-steps.visible { display: block; }
+  .fibrin-steps .fs-title { font-size: 13px; font-weight: 700; color: #047857; margin-bottom: 6px; }
+  .fibrin-steps .fs-text { font-size: 13px; color: #475569; line-height: 1.6; }
+
+  /* Stable clot box */
+  .stable-clot {
+    background: #047857; color: #fff; padding: 16px 28px; border-radius: 12px;
+    font-size: 18px; font-weight: 700; text-align: center; letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px rgba(4,120,87,0.3);
+    max-width: 500px; width: 100%;
+  }
+  .stable-clot .sub { font-size: 12px; font-weight: 400; opacity: 0.85; margin-top: 4px; }
+
+  /* Clinical panel */
+  .clinical-panel {
+    margin-top: 28px; background: #fff; border: 2px solid #a7f3d0;
+    border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: none;
+  }
+  .clinical-panel.visible { display: block; }
+  .clinical-panel h3 { font-size: 18px; font-weight: 700; margin: 0 0 14px; color: #059669; }
+  .clinical-items { display: flex; flex-direction: column; gap: 14px; }
+  .clinical-item { padding-left: 14px; border-left: 4px solid; }
+  .clinical-item .item-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+  .clinical-item .item-text { font-size: 14px; color: #475569; line-height: 1.5; margin-top: 3px; }
+
+  /* Summary */
+  .summary-box {
+    margin-top: 24px; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .summary-box h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; color: #475569; }
+  .summary-flow { font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 2; color: #374151; }
+  .summary-flow .grn { color: #059669; font-weight: 700; }
+  .summary-flow .dgrn { color: #047857; font-weight: 700; }
+  .summary-flow .amber { color: #d97706; font-size: 12px; }
+  .summary-flow .gray { color: #9ca3af; font-size: 12px; }
+  .summary-flow .italic { color: #6b7280; font-style: italic; font-size: 12px; }
+  .summary-flow .indent { padding-left: 16px; }
+  .summary-flow .proto-badge {
+    background: #d1fae5; border-radius: 6px; padding: 4px 10px;
+    display: inline-block; color: #047857; font-weight: 700;
+  }
+  .summary-flow .clot-badge {
+    background: #047857; color: #fff; border-radius: 6px; padding: 4px 10px;
+    display: inline-block; font-weight: 700;
+  }
+
+  .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #cbd5e1; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 24px; }
+    .facts-grid { grid-template-columns: 1fr 1fr; }
+    .factor-detail { flex-direction: column; }
+    .thrombin-roles { grid-template-columns: 1fr; }
+    .input-paths { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div style="margin-bottom: 28px;">
+    <div class="course-tag">10513121 Coagulation · Chapter 15</div>
+    <h1>The Common Pathway</h1>
+    <p class="subtitle">
+      Where both pathways converge. Involves <strong>PF3</strong> and Factors <strong>X, V, Prothrombin (II)</strong>, and <strong>Fibrinogen (I)</strong>.
+      Evaluated by <strong class="green">both PT and aPTT</strong>.
+    </p>
+    <button class="toggle-btn" id="clinicalToggle" onclick="toggleClinical()">Show Clinical &amp; BOC Notes</button>
+  </div>
+
+  <!-- Key Facts -->
+  <div class="facts-grid">
+    <div><div class="fact-label">Factors Involved</div><div class="fact-value">X, V, II, I, XIII</div></div>
+    <div><div class="fact-label">Cofactors</div><div class="fact-value">Ca²⁺ + PF3</div></div>
+    <div><div class="fact-label">Monitored By</div><div class="fact-value">PT and aPTT (both!)</div></div>
+    <div><div class="fact-label">Vit K Dependent</div><div class="fact-value">Factors X and II ★</div></div>
+    <div><div class="fact-label">Key Enzyme</div><div class="fact-value">Thrombin (IIa)</div></div>
+    <div><div class="fact-label">Key Complex</div><div class="fact-value">Prothrombinase</div></div>
+  </div>
+
+  <!-- Input from both pathways -->
+  <div class="input-paths">
+    <div class="input-box" style="background:#eff6ff; border:2px solid #3b82f6;">
+      <div class="tag" style="color:#3b82f6;">From Intrinsic</div>
+      <div class="name" style="color:#1e40af;">Tenase Complex (IXa + VIIIa)</div>
+      <div class="desc">Activates Factor X</div>
+    </div>
+    <div class="input-box" style="background:#fef2f2; border:2px solid #ef4444;">
+      <div class="tag" style="color:#ef4444;">From Extrinsic</div>
+      <div class="name" style="color:#991b1b;">TF-VIIa Complex</div>
+      <div class="desc">Activates Factor X</div>
+    </div>
+  </div>
+
+  <!-- Merge arrow -->
+  <div style="display:flex; justify-content:center;">
+    <svg width="200" height="36" viewBox="0 0 200 36">
+      <path d="M50 4 Q80 28 100 32" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+      <path d="M150 4 Q120 28 100 32" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3"/>
+      <circle cx="100" cy="32" r="3" fill="#059669"/>
+    </svg>
+  </div>
+
+  <!-- FLOWCHART -->
+  <div class="flowchart">
+
+    <!-- Step 1: Factor X → Xa -->
+    <div class="step-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleStep('s1')">
+      <div class="step-inner">
+        <div class="step-icon">⚡</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#059669;">1</div>
+            <h3 class="step-title" style="color:#059669;">Factor X → Xa</h3>
+          </div>
+          <p class="step-sub">Factor X (Stuart-Prower Factor) is activated to Xa by EITHER the intrinsic tenase complex OR the extrinsic TF-VIIa complex. This is where both pathways converge.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Factor X</div>
+              <div class="desc">Stuart-Prower Factor</div>
+              <div class="note-text">Vitamin K dependent ★</div>
+            </div>
+            <div class="arrow-label">
+              <span>intrinsic or extrinsic</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs><path d="M4 10 L32 10" stroke="#059669" stroke-width="2.5" marker-end="url(#arr1)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(5,150,105,0.07); border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Factor Xa</div>
+              <div class="desc">Activated Stuart-Prower</div>
+            </div>
+          </div>
+          <div class="step-label">★ Factor X is Vitamin K dependent (part of '1972' group: II, VII, IX, X)</div>
+          <div class="expand-note" id="s1-note" style="border:1px solid rgba(5,150,105,0.2);">💡 Factor X is measured by both PT and aPTT because it sits at the convergence point. A Factor X deficiency will prolong BOTH tests — this is a key BOC concept for differentiating which factor is deficient based on PT/aPTT patterns.</div>
+          <div class="tap-hint" id="s1-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0;">
+      <div style="font-size:10px; color:#6b7280; font-style:italic;">forms complex</div>
+      <svg width="24" height="26" viewBox="0 0 24 26"><path d="M12 2 L12 18 M8 15 L12 22 L16 15" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- Step 2: Prothrombinase Complex -->
+    <div class="step-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleStep('s2')">
+      <div class="step-inner">
+        <div class="step-icon">⚙️</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#059669;">2</div>
+            <h3 class="step-title" style="color:#059669;">PROTHROMBINASE Complex</h3>
+          </div>
+          <p class="step-sub">Factor Xa combines with Factor Va (cofactor), calcium, and platelet phospholipid (PF3) on the platelet surface. This is the enzyme complex that converts prothrombin to thrombin.</p>
+
+          <!-- Complex diagram -->
+          <div class="complex-box" style="background:#d1fae5; border:2px solid #047857;">
+            <div class="complex-title" style="color:#047857;">Prothrombinase Complex</div>
+            <div class="complex-parts">
+              <div class="complex-part" style="border:2px solid #047857;">
+                <div class="part-name" style="color:#047857;">Xa</div>
+                <div class="part-sub">enzyme</div>
+              </div>
+              <span class="complex-plus">+</span>
+              <div class="complex-part" style="border:2px solid #047857;">
+                <div class="part-name" style="color:#047857;">Va</div>
+                <div class="part-sub">cofactor</div>
+              </div>
+              <span class="complex-plus">+</span>
+              <div class="complex-part" style="border:2px solid #047857;">
+                <div class="part-name" style="color:#047857;">Ca²⁺</div>
+                <div class="part-sub">calcium</div>
+              </div>
+              <span class="complex-plus">+</span>
+              <div class="complex-part" style="border:2px solid #047857;">
+                <div class="part-name" style="color:#047857;">PF3</div>
+                <div class="part-sub">phospholipid</div>
+              </div>
+            </div>
+            <div class="complex-footer" style="color:#047857;">Assembled on the activated platelet surface</div>
+          </div>
+
+          <div class="step-label">Factor V is a COFACTOR (not an enzyme) — accelerates the reaction 300,000×</div>
+          <div class="expand-note" id="s2-note" style="border:1px solid rgba(5,150,105,0.2);">💡 Factor V is in the Fibrinogen Group (I, V, VIII, XIII) and is NOT Vitamin K dependent. Factor V is considered 'heat labile' along with Factor VIII — both are unstable in stored plasma. Factor V Leiden mutation causes APC resistance — the most common inherited thrombophilia.</div>
+          <div class="tap-hint" id="s2-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0;">
+      <div style="font-size:10px; color:#6b7280; font-style:italic;">converts</div>
+      <svg width="24" height="26" viewBox="0 0 24 26"><path d="M12 2 L12 18 M8 15 L12 22 L16 15" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- Step 3: Prothrombin → Thrombin -->
+    <div class="step-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleStep('s3')">
+      <div class="step-inner">
+        <div class="step-icon">🔥</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#059669;">3</div>
+            <h3 class="step-title" style="color:#059669;">Prothrombin (II) → Thrombin (IIa)</h3>
+          </div>
+          <p class="step-sub">The prothrombinase complex cleaves prothrombin into thrombin — the KEY enzyme of the entire coagulation cascade. Thrombin has multiple critical functions.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Prothrombin (II)</div>
+              <div class="desc">Zymogen (inactive)</div>
+              <div class="note-text">Vitamin K dependent ★</div>
+            </div>
+            <div class="arrow-label">
+              <span>prothrombinase</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs><path d="M4 10 L32 10" stroke="#059669" stroke-width="2.5" marker-end="url(#arr3)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(5,150,105,0.07); border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Thrombin (IIa)</div>
+              <div class="desc">KEY enzyme of cascade</div>
+            </div>
+          </div>
+          <div class="step-label">★ Prothrombin (Factor II) is Vitamin K dependent</div>
+          <div class="expand-note" id="s3-note" style="border:1px solid rgba(5,150,105,0.2);">💡 Thrombin is the central regulatory enzyme of hemostasis. It drives clot formation forward (positive feedback: activates V → Va, VIII → VIIIa, XI → XIa, XIII → XIIIa, and platelets) and also turns on the brakes (negative feedback: activates Protein C via thrombomodulin). This dual role is extremely high-yield for BOC exams.</div>
+
+          <!-- Thrombin roles grid -->
+          <div class="thrombin-roles" id="s3-roles">
+            <div class="role-box" style="background:#d1fae5; border:1px solid #059669;">
+              <div class="role-title" style="color:#059669;">⊕ Positive Feedback</div>
+              <div class="role-text">
+                Activates V → Va<br>
+                Activates VIII → VIIIa<br>
+                Activates XI → XIa<br>
+                Activates XIII → XIIIa<br>
+                Activates platelets
+              </div>
+            </div>
+            <div class="role-box" style="background:#fef2f2; border:1px solid #ef4444;">
+              <div class="role-title" style="color:#ef4444;">⊖ Negative Feedback</div>
+              <div class="role-text">
+                Binds thrombomodulin<br>
+                → Activates Protein C<br>
+                → APC inactivates Va &amp; VIIIa<br>
+                <em>(shuts down clotting)</em>
+              </div>
+            </div>
+          </div>
+
+          <div class="tap-hint" id="s3-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0;">
+      <div style="font-size:10px; color:#6b7280; font-style:italic;">cleaves</div>
+      <svg width="24" height="26" viewBox="0 0 24 26"><path d="M12 2 L12 18 M8 15 L12 22 L16 15" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- Step 4: Fibrinogen → Fibrin -->
+    <div class="step-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleStep('s4')">
+      <div class="step-inner">
+        <div class="step-icon">🧬</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#059669;">4</div>
+            <h3 class="step-title" style="color:#059669;">Fibrinogen (I) → Fibrin (Ia)</h3>
+          </div>
+          <p class="step-sub">Thrombin cleaves fibrinopeptides A and B from the fibrinogen molecule, creating fibrin monomers. The monomers spontaneously polymerize end-to-end and side-to-side, forming a SOFT (soluble) fibrin clot held together by hydrogen bonds.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Fibrinogen (I)</div>
+              <div class="desc">Soluble plasma protein</div>
+            </div>
+            <div class="arrow-label">
+              <span>thrombin cleaves</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs><path d="M4 10 L32 10" stroke="#059669" stroke-width="2.5" marker-end="url(#arr4)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(5,150,105,0.07); border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Fibrin (Ia)</div>
+              <div class="desc">Insoluble monomers → polymers</div>
+            </div>
+          </div>
+          <div class="step-label">Fibrinogen is the MAIN SUBSTRATE of the coagulation cascade — reference range: 200-400 mg/dL</div>
+          <div class="expand-note" id="s4-note" style="border:1px solid rgba(5,150,105,0.2);">💡 Thrombin splits fibrinopeptides A and B from the alpha and beta chains of fibrinogen. The resulting fibrin monomers polymerize spontaneously. At this stage the clot is still 'soluble' — it can be dissolved by 5M urea or 1% monochloroacetic acid. This is used in the Factor XIII screening test. Fibrinogen is an acute-phase reactant — elevated in inflammation, infection, pregnancy.</div>
+
+          <!-- Fibrin formation steps -->
+          <div class="fibrin-steps" id="s4-fibrin" style="border:1px solid rgba(5,150,105,0.2);">
+            <div class="fs-title">Fibrin Formation Steps (Fig. 15.7):</div>
+            <div class="fs-text">
+              <strong>1.</strong> Thrombin cleaves fibrinopeptides A &amp; B from fibrinogen<br>
+              <strong>2.</strong> Fibrin monomers polymerize (hydrogen bonds) → <em>soft/soluble clot</em><br>
+              <strong>3.</strong> Factor XIIIa cross-links with covalent bonds → <em>stable/insoluble clot</em><br>
+              <strong>4.</strong> Cross-linked clot resists fibrinolysis (plasmin)
+            </div>
+          </div>
+
+          <div class="tap-hint" id="s4-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0;">
+      <div style="font-size:10px; color:#6b7280; font-style:italic;">stabilized by</div>
+      <svg width="24" height="26" viewBox="0 0 24 26"><path d="M12 2 L12 18 M8 15 L12 22 L16 15" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- Step 5: Factor XIII → XIIIa -->
+    <div class="step-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleStep('s5')">
+      <div class="step-inner">
+        <div class="step-icon">🔒</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#059669;">5</div>
+            <h3 class="step-title" style="color:#059669;">Factor XIII → XIIIa → Cross-linked Fibrin</h3>
+          </div>
+          <p class="step-sub">Thrombin activates Factor XIII (Fibrin Stabilizing Factor) to XIIIa. XIIIa creates covalent cross-links between fibrin polymers, converting the soft clot into a stable, insoluble fibrin clot resistant to plasmin degradation.</p>
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Factor XIII</div>
+              <div class="desc">Fibrin Stabilizing Factor</div>
+            </div>
+            <div class="arrow-label">
+              <span>thrombin activates</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arr5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs><path d="M4 10 L32 10" stroke="#059669" stroke-width="2.5" marker-end="url(#arr5)"/></svg>
+            </div>
+            <div class="factor-box" style="background:rgba(5,150,105,0.07); border:2px solid #059669;">
+              <div class="name" style="color:#059669;">Factor XIIIa</div>
+              <div class="desc">Creates covalent cross-links</div>
+            </div>
+          </div>
+          <div class="step-label">Factor XIII deficiency: clot forms normally but dissolves — delayed bleeding (12-36 hrs post-trauma)</div>
+          <div class="expand-note" id="s5-note" style="border:1px solid rgba(5,150,105,0.2);">💡 Factor XIII deficiency does NOT prolong PT or aPTT — those tests only measure clot formation, not stabilization. Screening test: dissolve clot in 5M urea — normal clot (XIIIa cross-linked) is insoluble, XIII-deficient clot dissolves. Factor XIII deficiency causes delayed bleeding, poor wound healing, and recurrent miscarriage. It's often missed because routine coag tests are normal.</div>
+          <div class="tap-hint" id="s5-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0;">
+      <svg width="24" height="26" viewBox="0 0 24 26"><path d="M12 2 L12 18 M8 15 L12 22 L16 15" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- Stable Clot -->
+    <div class="stable-clot">
+      🔒 STABLE CROSS-LINKED FIBRIN CLOT
+      <div class="sub">Insoluble · Resistant to plasmin · Covalent bonds</div>
+    </div>
+
+  </div>
+
+  <!-- Clinical & BOC Notes -->
+  <div class="clinical-panel" id="clinicalPanel">
+    <h3>Clinical &amp; BOC Exam Notes</h3>
+    <div class="clinical-items">
+      <div class="clinical-item" style="border-color:#059669;">
+        <div class="item-title">Common Pathway &amp; Testing</div>
+        <div class="item-text">Common pathway factors (X, V, II, I) are evaluated by BOTH PT and aPTT. If both tests are prolonged → suspect common pathway deficiency, Vitamin K deficiency, warfarin, liver disease, or DIC. If only PT is prolonged → extrinsic (Factor VII). If only aPTT → intrinsic (XII, XI, IX, VIII).</div>
+      </div>
+      <div class="clinical-item" style="border-color:#dc2626;">
+        <div class="item-title">DIC — Disseminated Intravascular Coagulation</div>
+        <div class="item-text">DIC causes simultaneous clotting AND bleeding. Lab findings: prolonged PT, prolonged aPTT, decreased fibrinogen, decreased platelets, elevated D-dimer, elevated FDPs, decreased Factor V &amp; VIII. Causes: sepsis, obstetric complications (abruptio placentae), acute promyelocytic leukemia (APL/M3), trauma, malignancy.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#d97706;">
+        <div class="item-title">D-Dimer vs. FDPs</div>
+        <div class="item-text">D-dimer is SPECIFIC for cross-linked fibrin degradation (requires XIIIa action first). FDPs detect degradation of both fibrinogen AND fibrin. In DIC, BOTH are elevated. D-dimer is used to rule out DVT/PE — a negative D-dimer has high negative predictive value.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#7c3aed;">
+        <div class="item-title">Direct Oral Anticoagulants (DOACs)</div>
+        <div class="item-text">Apixaban &amp; Rivaroxaban → direct Factor Xa inhibitors. Dabigatran → direct thrombin (IIa) inhibitor. DOACs do NOT require routine monitoring (unlike warfarin/heparin). BOC loves asking which factor each DOAC targets.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#2563eb;">
+        <div class="item-title">Fibrinogen Testing — Clauss Method</div>
+        <div class="item-text">Clauss fibrinogen: add excess thrombin to diluted plasma → measure time to clot → inversely proportional to fibrinogen concentration. Reference range: 200-400 mg/dL. Afibrinogenemia: 0 mg/dL. Hypofibrinogenemia (heterozygous): 20-100 mg/dL. Dysfibrinogenemia: functional vs. antigenic level disparity.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#0891b2;">
+        <div class="item-title">Factor V Leiden &amp; APC Resistance</div>
+        <div class="item-text">Factor V Leiden mutation → mutant Factor V cannot be inactivated by Activated Protein C (APC). This is the most common inherited thrombophilia. Factor V activity level is NORMAL — the mutation affects APC's cleavage site, not Factor V production. Leads to increased thrombotic risk.</div>
+      </div>
+      <div class="clinical-item" style="border-color:#be185d;">
+        <div class="item-title">Thrombin Time (TT)</div>
+        <div class="item-text">The thrombin time adds thrombin directly to patient plasma and measures fibrinogen → fibrin conversion. Prolonged by: low fibrinogen, dysfibrinogenemia, heparin, FDPs (they interfere with fibrin polymerization), and direct thrombin inhibitors. TT bypasses the intrinsic and extrinsic pathways entirely.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-box">
+    <h3>Summary: Common Pathway at a Glance</h3>
+    <div class="summary-flow">
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:4px;">
+        <span style="color:#3b82f6;">Intrinsic →</span>
+        <span style="color:#ef4444;">Extrinsic →</span>
+      </div>
+      <div><span class="grn">Factor X → Xa</span> <span class="amber">★ Vit K dep.</span></div>
+      <div class="indent">↓ <span class="italic">+ Va + Ca²⁺ + PF3</span></div>
+      <div><span class="proto-badge">PROTHROMBINASE</span></div>
+      <div class="indent">↓ <span class="italic">converts</span></div>
+      <div><span class="grn">Prothrombin (II) → Thrombin (IIa)</span> <span class="amber">★ Vit K dep.</span></div>
+      <div class="indent">↓ <span class="italic">cleaves fibrinopeptides A &amp; B</span></div>
+      <div><span class="grn">Fibrinogen (I) → Fibrin (Ia)</span> <span class="gray">(soft clot)</span></div>
+      <div class="indent">↓ <span class="italic">thrombin activates</span></div>
+      <div><span class="grn">XIII → XIIIa</span> <span class="gray">(cross-links)</span></div>
+      <div class="indent">↓</div>
+      <div><span class="clot-badge">🔒 STABLE CROSS-LINKED FIBRIN CLOT</span></div>
+    </div>
+  </div>
+
+  <div class="footer">Northwood Technical College · MLT Program · Ciesla Ch. 15</div>
+
+</div>
+
+<script>
+var currentExpanded = null;
+
+function closeAll() {
+  document.querySelectorAll('.expand-note').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.thrombin-roles').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.fibrin-steps').forEach(function(el) { el.classList.remove('visible'); });
+  ['s1','s2','s3','s4','s5'].forEach(function(id) {
+    var hint = document.getElementById(id + '-hint');
+    if (hint) hint.textContent = '▼ tap for more detail';
+  });
+  currentExpanded = null;
+}
+
+function toggleStep(id) {
+  var note = document.getElementById(id + '-note');
+  var hint = document.getElementById(id + '-hint');
+  var roles = document.getElementById(id + '-roles');
+  var fibrin = document.getElementById(id + '-fibrin');
+  var wasExpanded = currentExpanded === id;
+
+  closeAll();
+
+  if (!wasExpanded) {
+    if (note) note.classList.add('visible');
+    if (roles) roles.classList.add('visible');
+    if (fibrin) fibrin.classList.add('visible');
+    if (hint) hint.textContent = '▲ tap to collapse';
+    currentExpanded = id;
+  }
+}
+
+function toggleClinical() {
+  var panel = document.getElementById('clinicalPanel');
+  var btn = document.getElementById('clinicalToggle');
+  var isVisible = panel.classList.contains('visible');
+  if (isVisible) {
+    panel.classList.remove('visible');
+    btn.classList.remove('active');
+    btn.textContent = 'Show Clinical & BOC Notes';
+  } else {
+    panel.classList.add('visible');
+    btn.classList.add('active');
+    btn.textContent = 'Hide Clinical & BOC Notes';
+  }
+}
+</script>
+</body>
+</html>
