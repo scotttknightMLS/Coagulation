@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build the Cascade — Coagulation Study Aid</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: #0f172a; color: #e2e8f0;
+    min-height: 100vh; padding: 24px 16px 48px;
+  }
+  body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(127,29,29,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(30,58,138,0.10) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(6,78,59,0.08) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  .container { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* Header */
+  .course-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #64748b; margin-bottom: 8px; }
+  h1 { font-size: 32px; font-weight: 700; color: #f8fafc; line-height: 1.15; margin-bottom: 6px; }
+  .subtitle { font-size: 16px; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; }
+
+  /* Mode selector */
+  .mode-bar {
+    display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .mode-btn {
+    background: #1e293b; border: 1.5px solid #334155; border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; font-family: 'IBM Plex Mono', monospace;
+    color: #94a3b8; cursor: pointer; transition: all 0.2s;
+  }
+  .mode-btn:hover { border-color: #475569; color: #e2e8f0; }
+  .mode-btn.active { border-color: #3b82f6; color: #60a5fa; background: rgba(37,99,235,0.1); }
+
+  /* Score bar */
+  .score-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+    padding: 12px 18px; margin-bottom: 20px;
+  }
+  .score-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'IBM Plex Mono', monospace; }
+  .score-value { font-size: 20px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+  .score-correct { color: #34d399; }
+  .score-wrong { color: #f87171; }
+  .score-step { color: #60a5fa; }
+
+  /* Cascade build area */
+  .cascade-area {
+    background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+    padding: 20px; margin-bottom: 20px; min-height: 200px;
+  }
+  .cascade-title {
+    font-size: 11px; color: #475569; text-transform: uppercase;
+    letter-spacing: 2px; font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 14px; text-align: center;
+  }
+
+  /* Placed steps */
+  .placed-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px; margin-bottom: 6px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .placed-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .placed-label { font-size: 15px; font-weight: 600; }
+  .placed-sub { font-size: 12px; opacity: 0.7; margin-top: 1px; }
+
+  /* Arrow between placed steps */
+  .placed-arrow {
+    text-align: center; color: #475569; font-size: 16px;
+    margin: 2px 0; line-height: 1;
+  }
+
+  /* Current prompt */
+  .prompt-box {
+    background: #0f172a; border: 2px dashed #334155; border-radius: 10px;
+    padding: 16px; text-align: center; margin-top: 10px;
+  }
+  .prompt-text { font-size: 15px; color: #94a3b8; line-height: 1.5; }
+  .prompt-text strong { color: #f8fafc; }
+
+  /* Choices */
+  .choices-area { margin-bottom: 20px; }
+  .choices-label {
+    font-size: 11px; color: #475569; text-transform: uppercase;
+    letter-spacing: 2px; font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .choices-grid {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .choice-btn {
+    background: #1e293b; border: 2px solid #334155; border-radius: 8px;
+    padding: 10px 16px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px; color: #e2e8f0; cursor: pointer;
+    transition: all 0.2s; flex: 0 0 auto;
+  }
+  .choice-btn:hover { border-color: #60a5fa; color: #60a5fa; transform: translateY(-1px); }
+  .choice-btn.correct {
+    border-color: #34d399; color: #34d399; background: rgba(52,211,153,0.1);
+    animation: pulse-green 0.4s ease;
+  }
+  .choice-btn.wrong {
+    border-color: #f87171; color: #f87171; background: rgba(248,113,113,0.1);
+    animation: shake 0.4s ease;
+  }
+  .choice-btn.used {
+    opacity: 0.25; pointer-events: none; border-color: #1e293b;
+  }
+  @keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Feedback */
+  .feedback {
+    padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
+    font-size: 14px; line-height: 1.5; display: none;
+  }
+  .feedback.visible { display: block; }
+  .feedback.correct-fb { background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #a7f3d0; }
+  .feedback.wrong-fb { background: rgba(248,113,113,0.1); border: 1px solid #f87171; color: #fecaca; }
+
+  /* Complete state */
+  .complete-box {
+    background: linear-gradient(135deg, rgba(52,211,153,0.1), rgba(59,130,246,0.1));
+    border: 2px solid #34d399; border-radius: 12px;
+    padding: 24px; text-align: center; display: none;
+  }
+  .complete-box.visible { display: block; }
+  .complete-box h2 { font-size: 24px; color: #34d399; margin-bottom: 8px; }
+  .complete-box p { font-size: 15px; color: #94a3b8; line-height: 1.5; }
+  .complete-box .final-score { font-size: 36px; font-weight: 700; color: #34d399; font-family: 'IBM Plex Mono', monospace; margin: 12px 0; }
+
+  .restart-btn {
+    background: #1e293b; border: 2px solid #3b82f6; border-radius: 8px;
+    padding: 10px 24px; font-size: 14px; font-family: 'IBM Plex Mono', monospace;
+    color: #60a5fa; cursor: pointer; transition: all 0.2s; margin-top: 12px;
+  }
+  .restart-btn:hover { background: rgba(59,130,246,0.1); }
+
+  .footer { margin-top: 24px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #334155; letter-spacing: 2px; text-transform: uppercase; }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 26px; }
+    .choice-btn { font-size: 12px; padding: 8px 12px; }
+    .placed-label { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="course-tag">10513121 Coagulation · Chapter 15</div>
+  <h1>Build the Cascade</h1>
+  <p class="subtitle">Click the correct factor or step in order to build the coagulation cascade from memory. Wrong answers cost you points — see how well you really know it.</p>
+
+  <!-- Mode selector -->
+  <div class="mode-bar">
+    <button class="mode-btn active" id="modeExtrinsic" onclick="startMode('extrinsic')">Extrinsic</button>
+    <button class="mode-btn" id="modeIntrinsic" onclick="startMode('intrinsic')">Intrinsic</button>
+    <button class="mode-btn" id="modeCommon" onclick="startMode('common')">Common</button>
+    <button class="mode-btn" id="modeFull" onclick="startMode('full')">Full Cascade</button>
+  </div>
+
+  <!-- Score -->
+  <div class="score-bar">
+    <div>
+      <div class="score-label">Step</div>
+      <div class="score-value score-step" id="stepDisplay">1 / —</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="score-label">Correct</div>
+      <div class="score-value score-correct" id="correctDisplay">0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="score-label">Mistakes</div>
+      <div class="score-value score-wrong" id="wrongDisplay">0</div>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback" id="feedback"></div>
+
+  <!-- Cascade build area -->
+  <div class="cascade-area">
+    <div class="cascade-title">Your Cascade</div>
+    <div id="cascadeDisplay"></div>
+    <div class="prompt-box" id="promptBox">
+      <div class="prompt-text" id="promptText">Choose a pathway above to begin!</div>
+    </div>
+  </div>
+
+  <!-- Choices -->
+  <div class="choices-area">
+    <div class="choices-label">Choose the next step</div>
+    <div class="choices-grid" id="choicesGrid"></div>
+  </div>
+
+  <!-- Complete -->
+  <div class="complete-box" id="completeBox">
+    <h2>🎉 Cascade Complete!</h2>
+    <div class="final-score" id="finalScore"></div>
+    <p id="finalMessage"></p>
+    <button class="restart-btn" onclick="restart()">Try Again</button>
+    <button class="restart-btn" onclick="nextMode()" id="nextModeBtn" style="margin-left:8px;">Next Pathway →</button>
+  </div>
+
+  <div class="footer">Northwood Technical College · MLT Program</div>
+</div>
+
+<script>
+var pathways = {
+  extrinsic: {
+    name: "Extrinsic Pathway",
+    color: "#f87171",
+    bg: "rgba(248,113,113,0.08)",
+    steps: [
+      { id: "tissue_injury", label: "Tissue Injury", sub: "Endothelial damage exposes subendothelium", hint: "What initiates the extrinsic pathway?" },
+      { id: "tf_exposed", label: "TF (Factor III) Exposed", sub: "Thromboplastin released from damaged cells", hint: "What protein is released from damaged tissue?" },
+      { id: "tf_vii", label: "TF + Factor VII + Ca²⁺", sub: "TF binds and activates Factor VII → VIIa", hint: "TF binds which factor in the presence of calcium?" },
+      { id: "tf_viia_complex", label: "TF–VIIa Complex", sub: "Active enzyme complex of extrinsic pathway", hint: "What complex forms from TF and activated VII?" },
+      { id: "activates_x", label: "Factor X → Xa", sub: "Entry into the common pathway", hint: "The TF-VIIa complex activates which factor to enter the common pathway?" },
+    ],
+    distractors: ["Factor XII", "Factor VIII", "Fibrinogen", "Factor XI", "Prekallikrein", "HMWK", "Factor XIII"]
+  },
+  intrinsic: {
+    name: "Intrinsic Pathway",
+    color: "#60a5fa",
+    bg: "rgba(96,165,250,0.08)",
+    steps: [
+      { id: "surface", label: "Endothelial Surface Exposed", sub: "Collagen exposed — contact activation begins", hint: "What surface event initiates the intrinsic pathway?" },
+      { id: "contact", label: "Contact Activation (HMWK, PK, XII)", sub: "Contact proteins activated on surface", hint: "Which group of proteins activates on the exposed surface?" },
+      { id: "xii_xiia", label: "Factor XII → XIIa", sub: "Hageman Factor activated by surface contact", hint: "Which factor is first activated in the contact phase?" },
+      { id: "xi_xia", label: "Factor XI → XIa", sub: "PTA activated by XIIa", hint: "XIIa activates which factor next?" },
+      { id: "ix_ixa", label: "Factor IX → IXa", sub: "Christmas Factor activated by XIa + Ca²⁺", hint: "XIa activates which Vitamin K-dependent factor?" },
+      { id: "tenase", label: "Tenase Complex (IXa + VIIIa + Ca²⁺ + PF3)", sub: "Assembled on platelet surface", hint: "IXa combines with VIIIa and cofactors to form what complex?" },
+      { id: "activates_x_i", label: "Factor X → Xa", sub: "Entry into the common pathway", hint: "The tenase complex activates which factor?" },
+    ],
+    distractors: ["TF (Factor III)", "Factor VII", "Prothrombin", "Fibrinogen", "Factor V", "Factor XIII", "Thrombin"]
+  },
+  common: {
+    name: "Common Pathway",
+    color: "#34d399",
+    bg: "rgba(52,211,153,0.08)",
+    steps: [
+      { id: "xa", label: "Factor X → Xa", sub: "Activated by intrinsic OR extrinsic pathway", hint: "What is the first step of the common pathway?" },
+      { id: "prothrombinase", label: "Prothrombinase (Xa + Va + Ca²⁺ + PF3)", sub: "Enzyme complex on platelet surface", hint: "Xa combines with Va and cofactors to form what complex?" },
+      { id: "thrombin", label: "Prothrombin (II) → Thrombin (IIa)", sub: "KEY enzyme of the cascade", hint: "Prothrombinase converts which zymogen to its active enzyme?" },
+      { id: "fibrin", label: "Fibrinogen (I) → Fibrin (Ia)", sub: "Thrombin cleaves fibrinopeptides A & B", hint: "Thrombin acts on which protein to form the clot structure?" },
+      { id: "xiiia", label: "Factor XIII → XIIIa", sub: "Fibrin Stabilizing Factor activated by thrombin", hint: "Thrombin also activates which factor to stabilize the clot?" },
+      { id: "stable_clot", label: "Stable Cross-linked Fibrin Clot", sub: "Insoluble — covalent bonds — resists plasmin", hint: "XIIIa cross-links fibrin to form what final product?" },
+    ],
+    distractors: ["Factor XII", "Factor VII", "TF (Factor III)", "HMWK", "Factor XI", "Prekallikrein", "Factor IX"]
+  },
+  full: {
+    name: "Full Cascade",
+    color: "#fbbf24",
+    bg: "rgba(251,191,36,0.08)",
+    steps: [
+      { id: "f_tissue", label: "Tissue Injury / Surface Exposure", sub: "Both pathways initiated", hint: "What event starts coagulation?" },
+      { id: "f_tf", label: "TF (Factor III) + Factor VII → TF-VIIa", sub: "Extrinsic pathway activation", hint: "Tissue factor binds which factor?" },
+      { id: "f_contact", label: "Contact Activation (XII, XI, PK, HMWK)", sub: "Intrinsic pathway begins", hint: "Surface contact activates which group?" },
+      { id: "f_xii", label: "XII → XIIa → XI → XIa", sub: "Sequential contact activation", hint: "Hageman factor activates, then activates PTA" },
+      { id: "f_ix", label: "Factor IX → IXa", sub: "Activated by XIa AND TF-VIIa (crossover)", hint: "Which Vit K-dependent factor is activated by both pathways?" },
+      { id: "f_tenase", label: "Tenase (IXa + VIIIa) → activates X", sub: "Intrinsic pathway output", hint: "IXa + VIIIa form what complex?" },
+      { id: "f_xa", label: "Factor X → Xa", sub: "Convergence point — common pathway begins", hint: "Both pathways converge at which factor?" },
+      { id: "f_proto", label: "Prothrombinase (Xa + Va + Ca²⁺ + PF3)", sub: "Enzyme complex", hint: "Xa + Va form what complex?" },
+      { id: "f_thrombin", label: "Prothrombin → Thrombin", sub: "Central enzyme of hemostasis", hint: "Prothrombinase activates which factor?" },
+      { id: "f_fibrin", label: "Fibrinogen → Fibrin → Cross-linked Clot", sub: "Thrombin cleaves → XIII stabilizes", hint: "Thrombin acts on fibrinogen, XIIIa does what?" },
+    ],
+    distractors: ["Protein C", "Antithrombin", "Plasminogen", "tPA", "D-dimer", "TFPI"]
+  }
+};
+
+var currentMode = null;
+var currentStep = 0;
+var correctCount = 0;
+var wrongCount = 0;
+var choices = [];
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function startMode(mode) {
+  currentMode = mode;
+  currentStep = 0;
+  correctCount = 0;
+  wrongCount = 0;
+
+  // Update mode buttons
+  document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+
+  // Reset displays
+  document.getElementById('cascadeDisplay').innerHTML = '';
+  document.getElementById('completeBox').classList.remove('visible');
+  document.getElementById('feedback').classList.remove('visible');
+  updateScore();
+  showStep();
+}
+
+function updateScore() {
+  var pw = pathways[currentMode];
+  var total = pw ? pw.steps.length : 0;
+  document.getElementById('stepDisplay').textContent = (currentStep + 1) + ' / ' + total;
+  document.getElementById('correctDisplay').textContent = correctCount;
+  document.getElementById('wrongDisplay').textContent = wrongCount;
+}
+
+function showStep() {
+  var pw = pathways[currentMode];
+  if (currentStep >= pw.steps.length) {
+    showComplete();
+    return;
+  }
+
+  var step = pw.steps[currentStep];
+  document.getElementById('promptText').innerHTML = '<strong>Step ' + (currentStep + 1) + ':</strong> ' + step.hint;
+  document.getElementById('promptBox').style.display = 'block';
+
+  // Build choices: correct answer + distractors + some other step labels
+  var correctLabel = step.label;
+  var pool = pw.distractors.slice();
+
+  // Add labels from other steps (not current, not already placed)
+  pw.steps.forEach(function(s, i) {
+    if (i !== currentStep && i > currentStep) {
+      pool.push(s.label);
+    }
+  });
+
+  // Pick 3-4 distractors
+  pool = shuffle(pool);
+  var numDistractors = Math.min(3, pool.length);
+  var selected = pool.slice(0, numDistractors);
+  selected.push(correctLabel);
+  choices = shuffle(selected);
+
+  var grid = document.getElementById('choicesGrid');
+  grid.innerHTML = '';
+  choices.forEach(function(c) {
+    var btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c;
+    btn.onclick = function() { handleChoice(c, correctLabel, btn); };
+    grid.appendChild(btn);
+  });
+
+  updateScore();
+}
+
+function handleChoice(chosen, correct, btn) {
+  var fb = document.getElementById('feedback');
+  var pw = pathways[currentMode];
+  var step = pw.steps[currentStep];
+
+  if (chosen === correct) {
+    correctCount++;
+    btn.classList.add('correct');
+
+    // Add to cascade display
+    var display = document.getElementById('cascadeDisplay');
+    if (currentStep > 0) {
+      var arrow = document.createElement('div');
+      arrow.className = 'placed-arrow';
+      arrow.textContent = '↓';
+      display.appendChild(arrow);
+    }
+    var div = document.createElement('div');
+    div.className = 'placed-step';
+    div.style.background = pw.bg;
+    div.style.border = '1px solid ' + pw.color + '44';
+    div.innerHTML = '<div class="placed-num" style="background:' + pw.color + ';">' + (currentStep + 1) + '</div>' +
+      '<div><div class="placed-label" style="color:' + pw.color + ';">' + step.label + '</div>' +
+      '<div class="placed-sub" style="color:#94a3b8;">' + step.sub + '</div></div>';
+    display.appendChild(div);
+
+    fb.className = 'feedback correct-fb visible';
+    fb.innerHTML = '✓ <strong>Correct!</strong> ' + step.sub;
+
+    // Mark all buttons as used
+    document.querySelectorAll('.choice-btn').forEach(function(b) { b.classList.add('used'); });
+
+    currentStep++;
+    updateScore();
+
+    setTimeout(function() {
+      fb.classList.remove('visible');
+      showStep();
+    }, 1200);
+
+  } else {
+    wrongCount++;
+    btn.classList.add('wrong');
+    setTimeout(function() { btn.classList.remove('wrong'); }, 500);
+
+    fb.className = 'feedback wrong-fb visible';
+    fb.innerHTML = '✗ <strong>Not quite.</strong> Think about: ' + step.hint;
+
+    updateScore();
+  }
+}
+
+function showComplete() {
+  document.getElementById('promptBox').style.display = 'none';
+  document.getElementById('choicesGrid').innerHTML = '';
+  document.getElementById('feedback').classList.remove('visible');
+
+  var pw = pathways[currentMode];
+  var total = pw.steps.length;
+  var pct = Math.round((correctCount / (correctCount + wrongCount)) * 100);
+
+  document.getElementById('completeBox').classList.add('visible');
+  document.getElementById('finalScore').textContent = pct + '%';
+
+  var msg = '';
+  if (wrongCount === 0) {
+    msg = 'Perfect run! You built the ' + pw.name + ' without a single mistake. 🔥';
+  } else if (wrongCount <= 2) {
+    msg = 'Strong work on the ' + pw.name + '. Just ' + wrongCount + ' mistake' + (wrongCount > 1 ? 's' : '') + ' — review those steps and try for a perfect run.';
+  } else {
+    msg = 'You completed the ' + pw.name + ' with ' + wrongCount + ' mistakes. Consider reviewing the pathway study aid, then try again.';
+  }
+  document.getElementById('finalMessage').textContent = msg;
+
+  // Show/hide next mode button
+  var modes = ['extrinsic', 'intrinsic', 'common', 'full'];
+  var idx = modes.indexOf(currentMode);
+  var nextBtn = document.getElementById('nextModeBtn');
+  if (idx < modes.length - 1) {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Next: ' + pathways[modes[idx + 1]].name + ' →';
+  } else {
+    nextBtn.style.display = 'none';
+  }
+
+  document.getElementById('stepDisplay').textContent = 'Done!';
+}
+
+function restart() {
+  startMode(currentMode);
+}
+
+function nextMode() {
+  var modes = ['extrinsic', 'intrinsic', 'common', 'full'];
+  var idx = modes.indexOf(currentMode);
+  if (idx < modes.length - 1) {
+    startMode(modes[idx + 1]);
+  }
+}
+
+// Initialize
+startMode('extrinsic');
+</script>
+</body>
+</html>
