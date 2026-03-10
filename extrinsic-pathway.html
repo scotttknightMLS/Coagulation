@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Extrinsic Pathway — Coagulation Study Aid</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', 'Charter', Georgia, serif;
+    background: #f8fafc;
+    color: #1e293b;
+    padding: 24px 16px 48px;
+    min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* Header */
+  .course-tag { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  h1 { font-size: 30px; font-weight: 700; color: #0f172a; line-height: 1.2; margin-bottom: 4px; }
+  .subtitle { font-size: 16px; color: #64748b; line-height: 1.5; margin-bottom: 12px; }
+  .subtitle strong { color: #1e293b; }
+  .subtitle .red { color: #dc2626; }
+
+  /* Toggle button */
+  .toggle-btn {
+    background: #fff; border: 1.5px solid #d1d5db; border-radius: 6px;
+    padding: 6px 14px; font-size: 13px; cursor: pointer;
+    font-family: inherit; color: #475569; transition: all 0.2s;
+  }
+  .toggle-btn.active { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
+
+  /* Key facts grid */
+  .facts-grid {
+    background: #fff; border: 2px solid #fecaca; border-radius: 10px;
+    padding: 16px; margin: 24px 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;
+  }
+  .fact-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .fact-value { font-size: 15px; font-weight: 700; color: #dc2626; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+
+  /* Flowchart */
+  .flowchart { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  .step-box {
+    width: 100%; max-width: 560px;
+    border-radius: 12px; padding: 16px 20px;
+    transition: box-shadow 0.2s; cursor: pointer;
+  }
+  .step-box:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .step-box.expanded { box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+
+  .step-inner { display: flex; align-items: flex-start; gap: 14px; }
+  .step-icon { font-size: 28px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+  .step-content { flex: 1; }
+  .step-header { display: flex; align-items: center; gap: 8px; }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .step-title { font-size: 18px; font-weight: 700; margin: 0; }
+  .step-sub { font-size: 14px; color: #475569; margin-top: 6px; line-height: 1.45; }
+
+  /* Factor detail boxes */
+  .factor-detail {
+    display: flex; align-items: center; gap: 10px; margin-top: 12px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .factor-box {
+    border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 150px;
+  }
+  .factor-box .name { font-size: 16px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+  .factor-box .desc { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .factor-box .note-text { font-size: 10px; color: #d97706; margin-top: 3px; font-weight: 600; }
+  .arrow-label { display: flex; flex-direction: column; align-items: center; }
+  .arrow-label span { font-size: 11px; color: #9ca3af; font-style: italic; }
+
+  /* Expandable notes */
+  .expand-note {
+    margin-top: 10px; padding: 10px 14px;
+    background: #fff; border: 1px solid #fecaca;
+    border-radius: 6px; font-size: 13px; color: #475569;
+    line-height: 1.5; font-style: italic;
+    display: none;
+  }
+  .expand-note.visible { display: block; }
+  .tap-hint { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+
+  /* Branch section */
+  .branch-container { width: 100%; max-width: 640px; margin-top: 16px; }
+  .branch-arrows { display: flex; justify-content: center; margin-bottom: 4px; }
+  .branch-boxes { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .branch-box {
+    flex: 1 1 260px; max-width: 300px; border-radius: 12px;
+    padding: 16px 18px; cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .branch-box:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .branch-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .branch-icon { font-size: 22px; }
+  .branch-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; padding: 2px 8px; border-radius: 4px;
+  }
+  .branch-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .branch-sub { font-size: 13px; color: #475569; margin: 0; line-height: 1.4; }
+  .branch-note {
+    margin-top: 10px; padding: 10px 12px;
+    background: #fff; border-radius: 6px; font-size: 13px;
+    color: #475569; line-height: 1.5; display: none;
+  }
+  .branch-note.visible { display: block; }
+
+  /* Clinical notes */
+  .clinical-panel {
+    margin-top: 28px; background: #fff; border: 2px solid #fecaca;
+    border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: none;
+  }
+  .clinical-panel.visible { display: block; }
+  .clinical-panel h3 { font-size: 18px; font-weight: 700; margin: 0 0 14px; color: #dc2626; }
+  .clinical-items { display: flex; flex-direction: column; gap: 14px; }
+  .clinical-item { padding-left: 14px; border-left: 4px solid; }
+  .clinical-item .item-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+  .clinical-item .item-text { font-size: 14px; color: #475569; line-height: 1.5; margin-top: 3px; }
+
+  /* Summary */
+  .summary-box {
+    margin-top: 24px; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .summary-box h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; color: #475569; }
+  .summary-flow { font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 2; color: #374151; }
+  .summary-flow .red { color: #dc2626; font-weight: 700; }
+  .summary-flow .darkred { color: #b91c1c; font-weight: 700; }
+  .summary-flow .blue { color: #2563eb; font-weight: 600; }
+  .summary-flow .green { color: #059669; font-weight: 600; }
+  .summary-flow .gray { color: #9ca3af; }
+  .summary-flow .italic { color: #6b7280; font-style: italic; font-size: 12px; }
+  .summary-flow .indent { padding-left: 16px; }
+  .summary-flow .branch-line { padding-left: 16px; display: flex; gap: 32px; flex-wrap: wrap; }
+  .summary-flow .small { font-size: 11px; color: #9ca3af; }
+
+  .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #cbd5e1; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 24px; }
+    .facts-grid { grid-template-columns: 1fr 1fr; }
+    .factor-detail { flex-direction: column; }
+    .branch-boxes { flex-direction: column; align-items: center; }
+    .branch-box { max-width: 100%; }
+    .summary-flow .branch-line { flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div style="margin-bottom: 28px;">
+    <div class="course-tag">10513121 Coagulation · Chapter 15</div>
+    <h1>The Extrinsic Pathway</h1>
+    <p class="subtitle">
+      The faster, tissue-factor-driven pathway. Involves Factors <strong>VII</strong>, <strong>III (TF)</strong>, and <strong>calcium</strong>.
+      Monitored by the <strong class="red">PT / INR</strong>.
+    </p>
+    <button class="toggle-btn" id="clinicalToggle" onclick="toggleClinical()">Show Clinical &amp; BOC Notes</button>
+  </div>
+
+  <!-- Key Facts -->
+  <div class="facts-grid">
+    <div><div class="fact-label">Factors Involved</div><div class="fact-value">III (TF), VII, Ca²⁺</div></div>
+    <div><div class="fact-label">Monitored By</div><div class="fact-value">PT (Prothrombin Time)</div></div>
+    <div><div class="fact-label">Reported As</div><div class="fact-value">INR (Intl Normalized Ratio)</div></div>
+    <div><div class="fact-label">Vit K Dependent</div><div class="fact-value">Factor VII ★</div></div>
+  </div>
+
+  <!-- Flowchart -->
+  <div class="flowchart">
+
+    <!-- Step 1: Vascular Injury -->
+    <div class="step-box" style="background:#fef2f2; border:2.5px solid #dc2626;" onclick="toggleStep('step1')">
+      <div class="step-inner">
+        <div class="step-icon">⚡</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#dc2626;">1</div>
+            <h3 class="step-title" style="color:#dc2626;">Vascular Injury</h3>
+          </div>
+          <p class="step-sub">Endothelial damage exposes subendothelium</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <svg width="24" height="32" viewBox="0 0 24 32" style="margin:2px 0;"><path d="M12 2 L12 24 M8 20 L12 28 L16 20" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 2: TF Exposed -->
+    <div class="step-box" style="background:#fef2f2; border:2.5px solid #dc2626;" onclick="toggleStep('step2')">
+      <div class="step-inner">
+        <div class="step-icon">🔴</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#dc2626;">2</div>
+            <h3 class="step-title" style="color:#dc2626;">Tissue Factor (TF) Exposed</h3>
+          </div>
+          <p class="step-sub">Factor III / Thromboplastin — released from damaged cells &amp; subendothelium</p>
+          <div class="expand-note" id="step2-note">💡 TF is a transmembrane glycoprotein normally NOT in contact with blood</div>
+          <div class="tap-hint" id="step2-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <svg width="24" height="32" viewBox="0 0 24 32" style="margin:2px 0;"><path d="M12 2 L12 24 M8 20 L12 28 L16 20" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 3: TF Binds Factor VII -->
+    <div class="step-box" style="background:#fef2f2; border:2.5px solid #dc2626;" onclick="toggleStep('step3')">
+      <div class="step-inner">
+        <div class="step-icon">🔗</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#dc2626;">3</div>
+            <h3 class="step-title" style="color:#dc2626;">TF Binds Factor VII</h3>
+          </div>
+          <p class="step-sub">TF activates VII → VIIa in the presence of Ca²⁺</p>
+
+          <!-- Factor detail boxes -->
+          <div class="factor-detail">
+            <div class="factor-box" style="background:#fff; border:2px solid #dc2626;">
+              <div class="name" style="color:#dc2626;">Factor VII</div>
+              <div class="desc">Stable Factor / Proconvertin</div>
+              <div class="note-text">Vitamin K dependent · Shortest half-life (4-6 hrs)</div>
+            </div>
+            <div class="arrow-label">
+              <span>+ Ca²⁺</span>
+              <svg width="40" height="20" viewBox="0 0 40 20"><defs><marker id="arrR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker></defs><path d="M4 10 L32 10" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrR)"/></svg>
+            </div>
+            <div class="factor-box" style="background:#fee2e2; border:2px solid #b91c1c;">
+              <div class="name" style="color:#b91c1c;">Factor VIIa</div>
+              <div class="desc">Activated Proconvertin</div>
+            </div>
+          </div>
+
+          <div class="expand-note" id="step3-note">💡 Factor VII has the shortest half-life of all coagulation factors, making the PT the first test affected by warfarin therapy.</div>
+          <div class="tap-hint" id="step3-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <svg width="24" height="32" viewBox="0 0 24 32" style="margin:2px 0;"><path d="M12 2 L12 24 M8 20 L12 28 L16 20" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <!-- Step 4: TF-VIIa Complex -->
+    <div class="step-box" style="background:#fee2e2; border:2.5px solid #b91c1c;" onclick="toggleStep('step4')">
+      <div class="step-inner">
+        <div class="step-icon">⚙️</div>
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-num" style="background:#b91c1c;">4</div>
+            <h3 class="step-title" style="color:#b91c1c;">TF–VIIa Complex</h3>
+          </div>
+          <p class="step-sub">The active enzyme complex of the extrinsic pathway</p>
+          <div class="expand-note" id="step4-note">💡 This complex is the primary initiator of coagulation in vivo</div>
+          <div class="tap-hint" id="step4-hint">▼ tap for more detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branch Section -->
+    <div class="branch-container">
+      <div class="branch-arrows">
+        <svg width="400" height="44" viewBox="0 0 400 44">
+          <defs>
+            <marker id="arrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+            <marker id="arrG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+          </defs>
+          <path d="M200 4 Q120 36 80 40" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrB)"/>
+          <path d="M200 4 Q280 36 320 40" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#arrG)"/>
+          <text x="200" y="14" fill="#b91c1c" font-size="11" font-family="Source Serif 4, serif" font-weight="600" text-anchor="middle">activates</text>
+        </svg>
+      </div>
+
+      <div class="branch-boxes">
+        <!-- Branch: Factor IX -->
+        <div class="branch-box" style="background:#eff6ff; border:2.5px solid #2563eb;" onclick="toggleBranch('branchIX')">
+          <div class="branch-header">
+            <span class="branch-icon">🔵</span>
+            <span class="branch-tag" style="color:#2563eb; background:rgba(37,99,235,0.1);">→ INTRINSIC PATHWAY</span>
+          </div>
+          <h3 class="branch-title" style="color:#2563eb;">Activates Factor IX → IXa</h3>
+          <p class="branch-sub">Christmas Factor → Activated Christmas Factor</p>
+          <div class="branch-note" id="branchIX-note" style="border:1px solid rgba(37,99,235,0.25);">💡 This is a CROSSOVER — extrinsic pathway activates an intrinsic pathway factor</div>
+          <div class="tap-hint" id="branchIX-hint">▼ tap for detail</div>
+        </div>
+
+        <!-- Branch: Factor X -->
+        <div class="branch-box" style="background:#ecfdf5; border:2.5px solid #059669;" onclick="toggleBranch('branchX')">
+          <div class="branch-header">
+            <span class="branch-icon">🟢</span>
+            <span class="branch-tag" style="color:#059669; background:rgba(5,150,105,0.1);">→ COMMON PATHWAY</span>
+          </div>
+          <h3 class="branch-title" style="color:#059669;">Activates Factor X → Xa</h3>
+          <p class="branch-sub">Stuart-Prower Factor → Activated Stuart-Prower</p>
+          <div class="branch-note" id="branchX-note" style="border:1px solid rgba(5,150,105,0.25);">💡 Factor X is the entry point into the COMMON pathway</div>
+          <div class="tap-hint" id="branchX-hint">▼ tap for detail</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clinical & BOC Notes -->
+  <div class="clinical-panel" id="clinicalPanel">
+    <h3>Clinical &amp; BOC Exam Notes</h3>
+    <div class="clinical-items">
+
+      <div class="clinical-item" style="border-color:#dc2626;">
+        <div class="item-title">PT / INR Monitoring</div>
+        <div class="item-text">
+          The <strong>Prothrombin Time (PT)</strong> evaluates the extrinsic + common pathways.
+          Patient plasma + thromboplastin + Ca²⁺ → clot. Results reported as <strong>INR</strong> for
+          standardized warfarin monitoring. INR = (Patient PT / Mean Normal PT)<sup>ISI</sup>
+        </div>
+      </div>
+
+      <div class="clinical-item" style="border-color:#d97706;">
+        <div class="item-title">Factor VII — Key BOC Facts</div>
+        <div class="item-text">
+          Factor VII has the <strong>shortest half-life</strong> (4-6 hours) of all coagulation factors.
+          This is why the <strong>PT is the first test to become abnormal</strong> in warfarin therapy
+          and in early vitamin K deficiency. Factor VII is Vitamin K dependent (mnemonic: <strong>1972</strong> = Factors II, VII, IX, X + Proteins C &amp; S).
+        </div>
+      </div>
+
+      <div class="clinical-item" style="border-color:#2563eb;">
+        <div class="item-title">Crossover Activation</div>
+        <div class="item-text">
+          The TF-VIIa complex activates <strong>both Factor IX (intrinsic)</strong> and <strong>Factor X (common)</strong>.
+          This crossover is why the classic "separate pathways" model is a simplification —
+          in vivo, the extrinsic pathway is the primary initiator of coagulation.
+        </div>
+      </div>
+
+      <div class="clinical-item" style="border-color:#059669;">
+        <div class="item-title">TFPI — Tissue Factor Pathway Inhibitor</div>
+        <div class="item-text">
+          TFPI inhibits the <strong>TF-VIIa-Xa complex</strong>, shutting down the extrinsic pathway
+          after initial activation. This is why the intrinsic pathway amplification
+          (via Factor IX) is necessary to sustain coagulation.
+        </div>
+      </div>
+
+      <div class="clinical-item" style="border-color:#7c3aed;">
+        <div class="item-title">Warfarin &amp; Factor VII</div>
+        <div class="item-text">
+          When a patient starts warfarin, <strong>Factor VII is depleted first</strong> due to its short half-life.
+          BOC question pattern: "A patient on warfarin has an elevated PT but normal aPTT.
+          The most likely deficient factor is: <strong>Factor VII</strong>."
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-box">
+    <h3>Summary: Extrinsic Pathway at a Glance</h3>
+    <div class="summary-flow">
+      <div><span class="red">Tissue Injury</span></div>
+      <div class="indent">↓ <span class="italic">exposes</span></div>
+      <div><span class="red">TF (Factor III)</span> + <span class="red">Factor VII</span> + <span class="gray">Ca²⁺</span></div>
+      <div class="indent">↓ <span class="italic">activates</span></div>
+      <div><span class="darkred">TF–VIIa Complex</span></div>
+      <div class="branch-line">
+        <div><span class="gray">↙</span> <span class="blue">IX → IXa</span> <span class="small">(intrinsic)</span></div>
+        <div><span class="gray">↘</span> <span class="green">X → Xa</span> <span class="small">(common)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Northwood Technical College · MLT Program · Ciesla Ch. 15</div>
+
+</div>
+
+<script>
+function toggleStep(id) {
+  var note = document.getElementById(id + '-note');
+  var hint = document.getElementById(id + '-hint');
+  if (!note) return;
+  var isVisible = note.classList.contains('visible');
+  // Close all step notes first
+  document.querySelectorAll('.expand-note').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.branch-note').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.tap-hint').forEach(function(el) {
+    if (el.id.includes('step')) el.textContent = '▼ tap for more detail';
+    if (el.id.includes('branch')) el.textContent = '▼ tap for detail';
+  });
+  if (!isVisible) {
+    note.classList.add('visible');
+    if (hint) hint.textContent = '▲ tap to collapse';
+  }
+}
+
+function toggleBranch(id) {
+  var note = document.getElementById(id + '-note');
+  var hint = document.getElementById(id + '-hint');
+  if (!note) return;
+  var isVisible = note.classList.contains('visible');
+  // Close all notes first
+  document.querySelectorAll('.expand-note').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.branch-note').forEach(function(el) { el.classList.remove('visible'); });
+  document.querySelectorAll('.tap-hint').forEach(function(el) {
+    if (el.id.includes('step')) el.textContent = '▼ tap for more detail';
+    if (el.id.includes('branch')) el.textContent = '▼ tap for detail';
+  });
+  if (!isVisible) {
+    note.classList.add('visible');
+    if (hint) hint.textContent = '▲ collapse';
+  }
+}
+
+function toggleClinical() {
+  var panel = document.getElementById('clinicalPanel');
+  var btn = document.getElementById('clinicalToggle');
+  var isVisible = panel.classList.contains('visible');
+  if (isVisible) {
+    panel.classList.remove('visible');
+    btn.classList.remove('active');
+    btn.textContent = 'Show Clinical & BOC Notes';
+  } else {
+    panel.classList.add('visible');
+    btn.classList.add('active');
+    btn.textContent = 'Hide Clinical & BOC Notes';
+  }
+}
+</script>
+</body>
+</html>
